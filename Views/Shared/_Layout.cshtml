@@ -25,7 +25,7 @@
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
-                        @if (ViewData["Username"] != null)
+                       @if (ViewData["Username"] != null)
                         {
                             <li class="nav-item">
                                 <span class="nav-link text-dark">Welcome, @ViewData["Username"]!</span>
@@ -36,11 +36,19 @@
                                 </form>
                             </li>
                         }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-action="Login" asp-controller="Admin">Logout</a>
+                            </li>
+                        }
                     </ul>
+
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -52,6 +60,7 @@
             &copy; 2024 - ProductManagementApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

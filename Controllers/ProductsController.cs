@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ProductManagementApp.Controllers
 {
-    [Authorize] // Add this to protect all actions in the controller
+    [Authorize] 
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,13 +24,54 @@ namespace ProductManagementApp.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index(string searchQuery, int page = 1, int pageSize = 5)
         {
-            var username = HttpContext.Session.GetString("Username");
+            var query = _context.Products.AsQueryable();
 
-            ViewData["Username"] = username; 
-            
-            return View(await _context.Products.ToListAsync());
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(p => p.Name.Contains(searchQuery) || p.Description.Contains(searchQuery));
+            }
+
+            var totalItems = query.Count();
+            var products = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.SearchQuery = searchQuery;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            return View(products);
+        }
+
+        //Products/GetProductList
+        //Here we have created an API to get all products List
+        [HttpGet]
+        public IActionResult GetProductList(string searchQuery, int page = 1, int pageSize = 5)
+        {
+            var query = _context.Products.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(p => p.Name.Contains(searchQuery) || p.Description.Contains(searchQuery));
+            }
+
+            var products = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Name,
+                    p.Amount,
+                    p.Description,
+                    p.ImagePath
+                })
+                .ToList();
+
+            return Json(new { data = products, currentPage = page, totalPages = Math.Ceiling((double)query.Count() / pageSize) });
         }
 
         public async Task<IActionResult> Details(int? id)
