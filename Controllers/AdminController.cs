@@ -9,9 +9,6 @@ namespace ProductManagementApp.Controllers
 {
     public class AdminController : Controller
     {
-        private readonly string adminUsername = "Admin";
-        private readonly string adminPassword = "Admin@3731";
-
         public IActionResult Login()
         {
             return View();
@@ -25,11 +22,9 @@ namespace ProductManagementApp.Controllers
             {
                 HttpContext.Session.SetString("Username", username);
 
-                var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, username),
-        };
+                ViewData["Username"] = username;
 
+                var claims = new List<Claim> { new Claim(ClaimTypes.Name, username) };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
@@ -42,13 +37,18 @@ namespace ProductManagementApp.Controllers
             return View();
         }
 
-
         [HttpPost]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
+            ViewData["Username"] = null;
+
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             return RedirectToAction("Login", "Admin");
         }
     }
+
+
+
 }
